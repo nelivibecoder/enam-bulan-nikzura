@@ -69,6 +69,7 @@ button { font: inherit; }
 .gate { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 1.5rem; background: rgba(15, 17, 24, .78); backdrop-filter: blur(6px); }
 .js .gate { display: flex; }
 .gate.hidden { display: none !important; }
+.gate-card[hidden], .btn[hidden] { display: none; }
 .gate-card { max-width: 25rem; width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 1.4rem; padding: 2rem 1.6rem; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
 .gate-moon { color: var(--moon); font-size: 1.6rem; }
 .gate-card h2 { font-family: var(--display); font-size: 1.9rem; margin: .3rem 0 .6rem; color: var(--text); }
@@ -314,7 +315,7 @@ html[data-theme="dark"] .env-front { background: #3a342c; color: #e8dcc8; }
 <body>
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
-  <div class="gate-card">
+  <div class="gate-card" id="gate-warn-card">
     <div class="gate-moon" aria-hidden="true">☾</div>
     <h2 id="gate-title">Sebelum baca</h2>
     <p class="gate-warn"><b>Amaran kandungan:</b> kematian watak utama, bunuh diri berbantu (assisted dying), lumpuh, mimpi ngeri dan flashback kemalangan.</p>
@@ -322,7 +323,17 @@ html[data-theme="dark"] .env-front { background: #3a342c; color: #e8dcc8; }
     <p class="gate-small">Rated Teen And Up Audiences. Kalau tema ni berat untuk you sekarang, takpe, boleh baca lain kali.</p>
     <div class="gate-actions">
       <button type="button" class="btn btn-primary" id="gate-yes">Okay, I nak baca</button>
-      <a class="btn btn-ghost" href="https://archiveofourown.org/users/CapOkayTaec">Bukan hari ni</a>
+      <button type="button" class="btn btn-ghost" id="gate-no">Bukan hari ni</button>
+    </div>
+  </div>
+  <div class="gate-card" id="gate-rest-card" hidden>
+    <div class="gate-moon" aria-hidden="true">☾</div>
+    <h2>Takpe 🤍</h2>
+    <p>Cerita ni tak ke mana. Simpan link ni, datang balik bila you dah ready.</p>
+    <p class="gate-small">Jaga diri you dulu, okay?</p>
+    <div class="gate-actions">
+      <button type="button" class="btn btn-ghost" id="gate-back" hidden>Balik ke page sebelum ni</button>
+      <button type="button" class="btn btn-ghost" id="gate-changed">Sebenarnya, I nak baca</button>
     </div>
   </div>
 </div>
@@ -878,6 +889,16 @@ html[data-theme="dark"] .env-front { background: #3a342c; color: #e8dcc8; }
   else { document.body.classList.add('locked'); }
   document.getElementById('gate-yes').addEventListener('click', function () {
     gate.classList.add('hidden'); document.body.classList.remove('locked'); store('eb-cw', 'ok');
+  });
+  var warnCard = document.getElementById('gate-warn-card'), restCard = document.getElementById('gate-rest-card');
+  var backBtn = document.getElementById('gate-back');
+  if (document.referrer && window.history.length > 1) backBtn.hidden = false;
+  document.getElementById('gate-no').addEventListener('click', function () {
+    warnCard.hidden = true; restCard.hidden = false; document.getElementById('gate-changed').focus();
+  });
+  backBtn.addEventListener('click', function () { history.back(); });
+  document.getElementById('gate-changed').addEventListener('click', function () {
+    restCard.hidden = true; warnCard.hidden = false; document.getElementById('gate-yes').focus();
   });
 
   // ---------- Theme ----------
